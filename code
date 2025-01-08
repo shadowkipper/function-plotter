@@ -1,0 +1,82 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np
+
+# 그래프를 그리는 함수
+def plot_function(func_str, x_min, x_max):
+    try:
+        # 사용자가 입력한 함수를 파싱
+        func = lambda x: eval(func_str)
+
+        # X 범위와 세밀도
+        x = np.linspace(float(x_min), float(x_max), 1000)
+        y = func(x)
+
+        # Matplotlib으로 그래프 생성
+        fig, ax = plt.subplots(figsize=(6, 4))
+        ax.plot(x, y, label=func_str)
+        ax.axhline(0, color='black', linewidth=0.8, linestyle='--')
+        ax.axvline(0, color='black', linewidth=0.8, linestyle='--')
+        ax.set_title("Graph of the Function")
+        ax.set_xlabel("x")
+        ax.set_ylabel("f(x)")
+        ax.grid(True)
+        ax.legend()
+
+        # 캔버스에 그래프 표시
+        canvas = FigureCanvasTkAgg(fig, master=graph_frame)
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        canvas.draw()
+
+    except Exception as e:
+        messagebox.showerror("Error", f"Invalid function or range. Details: {str(e)}")
+
+# 그래프 창 초기화 함수 (이전 그래프 치우기)
+def clear_graph():
+    for widget in graph_frame.winfo_children():
+        widget.destroy()
+
+# 버튼 클릭 이벤트 핸들러
+def on_plot_button_click():
+    clear_graph()  # 기존 그래프를 삭제
+    func_str = func_entry.get()
+    x_min = x_min_entry.get()
+    x_max = x_max_entry.get()
+    if func_str and x_min and x_max:
+        plot_function(func_str, x_min, x_max)
+    else:
+        messagebox.showwarning("Input Error", "Please fill in all fields")
+
+# Tkinter GUI 설정
+root = tk.Tk()
+root.title("Function Plotter")
+
+# 위젯 생성
+input_frame = ttk.Frame(root)
+input_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=5)
+
+graph_frame = ttk.Frame(root)
+graph_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+
+ttk.Label(input_frame, text="Function:").pack(side=tk.LEFT, padx=5)
+
+func_entry = ttk.Entry(input_frame, width=30)
+func_entry.pack(side=tk.LEFT, padx=5)
+
+ttk.Label(input_frame, text="X Min:").pack(side=tk.LEFT, padx=5)
+
+x_min_entry = ttk.Entry(input_frame, width=10)
+x_min_entry.pack(side=tk.LEFT, padx=5)
+
+ttk.Label(input_frame, text="X Max:").pack(side=tk.LEFT, padx=5)
+
+x_max_entry = ttk.Entry(input_frame, width=10)
+x_max_entry.pack(side=tk.LEFT, padx=5)
+
+plot_button = ttk.Button(input_frame, text="Plot", command=on_plot_button_click)
+plot_button.pack(side=tk.LEFT, padx=5)
+
+# GUI 실행
+root.mainloop()
